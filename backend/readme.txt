@@ -1,3 +1,6 @@
+run the following:
+uvicorn backend.main;app --reload
+
 API key, method:GET
 http://127.0.0.1:8000/influencers
 
