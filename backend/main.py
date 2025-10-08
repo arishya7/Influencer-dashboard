@@ -8,7 +8,7 @@ app = FastAPI()
 
 
 # read dataset
-df = pd.read_csv("data/combine_all3.csv")
+df = pd.read_csv("data/combine_all3_new.csv")
 
 
 @app.get("/influencers")
@@ -70,12 +70,21 @@ def get_influencers(
     
 
     # limit of one page
+    total = len(filtered_df)
     result = filtered_df.iloc[skip: skip + limit]
-
     result = result.replace([np.nan,np.inf],None)
-    # JSON output
-    return result[[
+
+    wanted_col = [
         "name", "username", "source", "followers", "uniqueid","heart","verified",
-        "country", "primary_category", "secondary_category","email",
-        "contact", "bio", "profile_url","age_children","source","mentions"
-    ]].to_dict(orient="records")
+        "country", "primary_category", "secondary_category","email","tier",
+        "contact", "bio", "profile_url","age_children","mentions"
+    ]
+    existing_col = [c for c in wanted_col if c in result.columns]
+
+    # JSON output
+    return {
+        "total":total,
+        "skip":skip,
+        "limit":limit,
+        "items":result[existing_col].to_dict(orient="records")
+    }
