@@ -20,7 +20,7 @@ def get_influencers(
     tier: Optional[List[str]] = Query(None),
     followers_min: Optional[int] = None,
     
-    is_brand: Optional[bool] = None,
+    is_brand: Optional[List[str]] = Query(None),
     num_children_min: Optional[int] = None,
     age_children_min:Optional[int] = None,
     
@@ -57,7 +57,7 @@ def get_influencers(
 
     # filter by brand
     if is_brand is not None:
-        filtered_df = filtered_df[filtered_df["is_brand"]==is_brand]
+        filtered_df = filtered_df[filtered_df["is_brand"].isin(is_brand)]
     
     #filter by children_num
     if num_children_min is not None:
@@ -77,7 +77,7 @@ def get_influencers(
     wanted_col = [
         "name", "username", "source", "followers", "uniqueid","heart","verified",
         "country", "primary_category", "secondary_category","email","tier",
-        "contact", "bio", "profile_url","age_children","mentions"
+        "contact", "bio", "profile_url","age_children","num_children","mentions"
     ]
     existing_col = [c for c in wanted_col if c in result.columns]
 
