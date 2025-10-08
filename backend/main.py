@@ -76,7 +76,7 @@ def get_influencers(
 
     wanted_col = [
         "name", "username", "source", "followers", "uniqueid","heart","verified",
-        "country", "primary_category", "secondary_category","email","tier",
+        "country", "primary_category", "secondary_category","email","tier","is_brand",
         "contact", "bio", "profile_url","age_children","num_children","mentions"
     ]
     existing_col = [c for c in wanted_col if c in result.columns]

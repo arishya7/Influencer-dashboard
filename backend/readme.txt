@@ -1,6 +1,17 @@
 API key, method:GET
 http://127.0.0.1:8000/influencers
 
+
+# parameter name in API 
+http://127.0.0.1:8000/influencers?platform=  ,possible value is [Instragram, Tiktok, Rednote]
+http://127.0.0.1:8000/influencers?country=
+http://127.0.0.1:8000/influencers?primary_category=..&secondary_category=..
+http://127.0.0.1:8000/influencers?tier= ,possible value is['Micro', 'Macro', 'Nano', 'Celebrity', 'Seeder']
+http://127.0.0.1:8000/influencers?followers_min=
+http://127.0.0.1:8000/influencers?is_brand=     ,possible_value is['Unknown', 'Influencer', 'Brand']
+http://127.0.0.1:8000/influencers?num_children_min
+http://127.0.0.1:8000/influencers?age_children_min=
+http://127.0.0.1:8000/influencers?limit=
 category dictionary
 primary_category:{
     "Parenting + Lifestyle": "Parenting%20%2B%20Lifestyle",
