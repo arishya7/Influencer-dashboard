@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, Body
 from typing import List, Optional
 import pandas as pd
 import numpy as np
@@ -8,7 +8,7 @@ app = FastAPI()
 
 
 # read dataset
-df = pd.read_csv("data/combine_all3_new.csv")
+df = pd.read_csv("data/combine_all3_n.csv")
 
 
 @app.get("/influencers")
@@ -88,3 +88,26 @@ def get_influencers(
         "limit":limit,
         "items":result[existing_col].to_dict(orient="records")
     }
+
+
+
+#====Edit API========
+@app.patch("/influencers/{uniqueid}")
+def update_influencer(uniqueid: str, updates: dict = Body(...)):
+    global df
+
+    if uniqueid not in df["uniqueid"].values:
+        return {"error": "Not found"}
+
+    idx = df.index[df["uniqueid"].astype(str) == str(uniqueid)][0]
+
+    for field, value in updates.items():
+        if field in df.columns:   
+            df.at[idx, field] = value
+
+    df.to_csv("data/combine_all3_new.csv", index=False)
+    record = df.loc[idx].replace([np.nan,np.inf],None).to_dict()
+    return {"status": "success", 
+            "update_fields":updates,
+            "id":uniqueid,
+            "data": record}

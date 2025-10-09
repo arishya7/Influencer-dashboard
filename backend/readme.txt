@@ -44,3 +44,8 @@ secondary_category: {
     "Baby / Kids' Products": "Baby%20%2F%20Kids%27%20Products",
     "Family Vlog / Activities": "Family%20Vlog%20%2F%20Activities"
 }
+
+=======Edit API=============
+http://127.0.0.1:8000/influencers/r964cdc93
+body, json
+{"num_children":2}
