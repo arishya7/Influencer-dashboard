@@ -8,7 +8,7 @@ app = FastAPI()
 
 
 # read dataset
-df = pd.read_csv("data/combine_all3_n.csv")
+df = pd.read_csv("data/combine_all3_new.csv")
 
 
 @app.get("/influencers")
