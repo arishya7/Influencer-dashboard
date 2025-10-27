@@ -1,12 +1,119 @@
 import streamlit as st
 import pandas as pd
 import requests
-from api_client import fetch_influencers
-
-
+from api_client import fetch_influencers, login_user
 
 st.set_page_config(page_title="Influencer Dashboard", layout="wide")
 
+#LOGIN PART
+def show_login():
+    st.markdown("""
+        <style>
+        /* Hide Streamlit chrome */
+        #MainMenu, footer, header {visibility: hidden;}
+        section[data-testid="stSidebar"] {display: none;}
+
+        /* Full page background */
+        [data-testid="stAppViewContainer"] {
+            background-color: #0f1116 !important;
+        }
+        
+        /* Center the block container and remove default padding */
+        [data-testid="block-container"] {
+            padding: 10vh 1rem 0 1rem !important;
+            max-width: 400px !important;
+            margin: 0 auto !important;
+        }
+
+        /* Login card styling */
+        .login-card {
+            background-color: #1b1f2a;
+            padding: 40px 35px;
+            border-radius: 16px;
+            box-shadow: 0px 6px 18px rgba(0,0,0,0.6);
+            text-align: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .login-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: white;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .login-subtitle {
+            font-size: 0.9rem;
+            color: #ccc;
+            margin-bottom: 20px;
+            justify-content: center;
+            text-align: center;
+        }
+
+
+        .stTextInput > div > div > input {
+            background-color: #2a2f3c !important;
+            color: white !important;
+            border-radius: 6px;
+            border: none;
+            padding: 0.6rem 1rem !important;
+        }
+
+        .stButton > button {
+            background-color: #C990B8 !important;
+            color: white !important;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            padding: 0.6rem 2rem;
+            transition: all 0.2s ease;
+        }
+
+        .stButton > button:hover {
+            background-color: #C990B8 !important;
+            transform: scale(1.03);
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+    # Login card
+    st.markdown('<div class="login-card">', unsafe_allow_html=True)
+    st.markdown('<div class="login-title">👩‍💻Influencer Dashboard Login</div>', unsafe_allow_html=True)
+    st.markdown('<div class="login-subtitle">Please enter your credentials to continue</div>', unsafe_allow_html=True)
+
+    username = st.text_input("Username", placeholder="Enter username", key="login_username", label_visibility="collapsed")
+    password = st.text_input("Password", placeholder="Enter password", key="login_password", type="password", label_visibility="collapsed")
+
+    if st.button("Login", use_container_width=True):
+        token = login_user(username, password)
+        if token:
+            st.session_state["token"] = token
+            st.session_state["username"] = username
+            st.experimental_rerun()
+        else:
+            st.error("Invalid username or password")
+
+    st.markdown('</div>', unsafe_allow_html=True)
+    st.stop()
+
+
+
+if "token" not in st.session_state:
+    show_login()
+
+st.markdown("<style>section[data-testid='stSidebar'] {display: block;}</style>", unsafe_allow_html=True)
+
+st.markdown(f"""
+<div style='text-align:right; color:white;'>
+👤 {st.session_state.get("username", "")}
+</div>
+""", unsafe_allow_html=True)
+
+
+#ACTUAL DASHBOARD PAGE
 #styles 
 st.markdown('<div class="main-title">📁 Influencer Dashboard </div>', unsafe_allow_html=True)
 st.markdown("""<style>
@@ -87,6 +194,12 @@ with st.sidebar:
     followers = st.number_input("Min Followers", min_value=0, value=0, step=100,key="followers_filter")
     child_age = st.number_input("Min Child Age", min_value=0, value=0, step=1,key="child_age_filter")
     child_num = st.number_input("Min Number of Children", min_value=0, value=0, step=1,key="child_num_filter")
+
+    if st.button("Logout"):
+        st.session_state.clear()
+        st.toast("👋 Logged out successfully!")
+        st.experimental_rerun()
+
 
 
 
