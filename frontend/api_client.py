@@ -3,7 +3,7 @@ import requests
 import pandas as pd
 import streamlit as st
 
-API_URL = "http://127.0.0.1:8000/influencers"
+API_URL = "http://api:8000/influencers"
 
 def fetch_influencers(params=None):
     """Fetch influencer data and unpack nested JSON."""

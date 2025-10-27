@@ -1,0 +1,42 @@
+version: "3.8"
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: influencer-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: MMDb@ccess123!
+      MYSQL_DATABASE: mminfluencer_db
+    ports:
+      - "3307:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+
+  api:
+    build: ./backend
+    container_name: influencer-api
+    restart: always
+    depends_on:
+      - db
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+
+
+  frontend:
+    build: ./frontend
+    container_name: influencer-frontend
+    restart: always
+    depends_on:
+      - api
+    ports:
+      - "8501:8501"
+
+
+volumes:
+  db_data:
+
+
