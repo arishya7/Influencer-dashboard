@@ -173,17 +173,28 @@ def login(data: LoginRequest):
 
 
     # verify username and password
-    if not user or not bcrypt.verify(data.password, user.password):
+    if not user:
         raise HTTPException(status_code=401, detail="Invalid username or password")
 
 
     # generate JWT
+    user_dict = dict(user._mapping)
+    print("DEBUG password hash from DB:", user_dict["password"])  
+
+
+    if not bcrypt.verify(data.password.strip(), user_dict["password"]):
+        raise HTTPException(status_code=401, detail="Invalid username or password")
+
+
     token_data = {
         "sub": data.username,
         "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1)
     }
     token = jwt.encode(token_data, SECRET_KEY, algorithm=ALGORITHM)
-    return {"access_token": token}
+    return {"access_token": token, "token_type": "bearer"}
+
+
+
 
 
 # ------------------ protected API ------------------
