@@ -117,7 +117,7 @@ def show_login():
         if token:
             st.session_state["access_token"] = token
             st.session_state["username"] = username
-            st.experimental_rerun()
+            st.rerun()
         else:
             st.error("Invalid username or password")
 
@@ -220,8 +220,7 @@ with st.sidebar:
     if st.button("Logout"):
         st.session_state.clear()
         st.toast("👋 Logged out successfully!")
-        st.experimental_rerun()
-
+        st.rerun()
 
 
 
