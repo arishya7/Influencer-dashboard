@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 from sqlalchemy import create_engine,Table, MetaData
 from sqlalchemy.orm import sessionmaker
-from passlib.hash import bcrypt
+import bcrypt
 from jose import jwt, JWTError
 from dotenv import load_dotenv
 import os
@@ -178,11 +178,14 @@ def login(data: LoginRequest):
 
 
     # generate JWT
-    user_dict = dict(user._mapping)
-    print("DEBUG password hash from DB:", user_dict["password"])  
+    user_dict = dict(user._mapping)["password"]
+    #print("DEBUG user",user)
+    #print("DEBAG keys",user._mapping.keys())
+    #print("DEBUG password hash from DB:", user_dict["password"])  
+    #print("DEBUG type",type(user_dict.get("password")))
 
 
-    if not bcrypt.verify(data.password.strip(), user_dict["password"]):
+    if not bcrypt.checkpw(data.password.strip().encode("utf-8"), user_dict.encode("utf-8")):
         raise HTTPException(status_code=401, detail="Invalid username or password")
 
 
