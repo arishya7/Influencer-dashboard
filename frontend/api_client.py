@@ -3,12 +3,14 @@ import requests
 import pandas as pd
 import streamlit as st
 
-API_URL = "http://api:8000/influencers" #change from 127.0.0.1 to api
+
+INFLUENCER = "http://127.0.0.1:8000/influencers"
+API_URL = "http://127.0.0.1:8000"
 
 def fetch_influencers(params=None):
     """Fetch influencer data and unpack nested JSON."""
     try:
-        response = requests.get(API_URL, params=params)
+        response = requests.get(INFLUENCER, params=params)
         response.raise_for_status()
         data = response.json()
 
@@ -30,3 +32,14 @@ def fetch_influencers(params=None):
     except Exception as e:
         st.error(f"Failed to load data from API: {e}")
         return pd.DataFrame()
+
+def login_user(username, password):
+    """Authenticate user and retrieve access token."""
+    try:
+        response = requests.post(f"{API_URL}/login", json={"username": username, "password": password})
+        response.raise_for_status()
+        data = response.json()
+        return data.get("access_token", None)
+    except Exception as e:
+        st.error(f"Login failed: {e}")
+        return None

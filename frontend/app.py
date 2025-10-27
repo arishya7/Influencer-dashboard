@@ -7,53 +7,79 @@ st.set_page_config(page_title="Influencer Dashboard", layout="wide")
 
 #LOGIN PART
 def show_login():
+    
     st.markdown("""
         <style>
-        /* Hide Streamlit chrome */
-        #MainMenu, footer, header {visibility: hidden;}
-        section[data-testid="stSidebar"] {display: none;}
+        /* Remove all Streamlit headers / toolbars / margins */
+        header, [data-testid="stHeader"], [data-testid="stToolbar"], [data-testid="stDecoration"] {
+            display: none !important;
+        }
 
-        /* Full page background */
+        /* Make the whole viewport a flexbox container */
         [data-testid="stAppViewContainer"] {
             background-color: #0f1116 !important;
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            height: 100vh !important;
+            padding: 0 !important;
+            margin: 0 !important;
         }
-        
-        /* Center the block container and remove default padding */
+
+        /* Force all parent containers to take full height */
+        section[data-testid="stAppViewBlockContainer"],
+        main,
         [data-testid="block-container"] {
-            padding: 10vh 1rem 0 1rem !important;
-            max-width: 400px !important;
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            flex-direction: column !important;
+            height: 100% !important;
+            width: 100% !important;
+            padding: 0 !important;
             margin: 0 auto !important;
         }
 
-        /* Login card styling */
+        /* Centered login card */
         .login-card {
             background-color: #1b1f2a;
             padding: 40px 35px;
             border-radius: 16px;
             box-shadow: 0px 6px 18px rgba(0,0,0,0.6);
             text-align: center;
-            justify-content: center;
-            text-align: center;
+            width: 350px;
+        }
+        /* Constrain input container width */
+        .stTextInput {
+            max-width: 100% !important;
+        }
+        
+        .stTextInput > div > div > input {
+            background-color: #2a2f3c !important;
+            color: white !important;
+            border-radius: 6px;
+            border: none;
+            padding: 0.6rem 1rem !important;
+            width: 100% !important;
+            max-width: 100% !important;
         }
 
+        /* Title and subtitle */
         .login-title {
             font-size: 1.8rem;
             font-weight: 700;
-            margin-bottom: 8px;
             color: white;
-            justify-content: center;
+            margin-bottom: 8px;
             text-align: center;
         }
-
         .login-subtitle {
             font-size: 0.9rem;
             color: #ccc;
             margin-bottom: 20px;
-            justify-content: center;
             text-align: center;
         }
 
-
+        /* Inputs */
         .stTextInput > div > div > input {
             background-color: #2a2f3c !important;
             color: white !important;
@@ -62,6 +88,7 @@ def show_login():
             padding: 0.6rem 1rem !important;
         }
 
+        /* Button */
         .stButton > button {
             background-color: #C990B8 !important;
             color: white !important;
@@ -71,16 +98,14 @@ def show_login():
             padding: 0.6rem 2rem;
             transition: all 0.2s ease;
         }
-
         .stButton > button:hover {
-            background-color: #C990B8 !important;
             transform: scale(1.03);
         }
         </style>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
 
-    # Login card
-    st.markdown('<div class="login-card">', unsafe_allow_html=True)
+    
+    # Remove the opening div tag and just use markdown for titles
     st.markdown('<div class="login-title">👩‍💻Influencer Dashboard Login</div>', unsafe_allow_html=True)
     st.markdown('<div class="login-subtitle">Please enter your credentials to continue</div>', unsafe_allow_html=True)
 
@@ -90,18 +115,15 @@ def show_login():
     if st.button("Login", use_container_width=True):
         token = login_user(username, password)
         if token:
-            st.session_state["token"] = token
+            st.session_state["access_token"] = token
             st.session_state["username"] = username
             st.experimental_rerun()
         else:
             st.error("Invalid username or password")
 
-    st.markdown('</div>', unsafe_allow_html=True)
     st.stop()
 
-
-
-if "token" not in st.session_state:
+if "access_token" not in st.session_state:
     show_login()
 
 st.markdown("<style>section[data-testid='stSidebar'] {display: block;}</style>", unsafe_allow_html=True)
