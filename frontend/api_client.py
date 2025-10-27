@@ -4,8 +4,8 @@ import pandas as pd
 import streamlit as st
 
 
-INFLUENCER = "http://127.0.0.1:8000/influencers"
-API_URL = "http://127.0.0.1:8000"
+INFLUENCER = "http://api:8000/influencers"
+API_URL = "http://api:8000"
 
 def fetch_influencers(params=None):
     """Fetch influencer data and unpack nested JSON."""
@@ -36,10 +36,26 @@ def fetch_influencers(params=None):
 def login_user(username, password):
     """Authenticate user and retrieve access token."""
     try:
-        response = requests.post(f"{API_URL}/login", json={"username": username, "password": password})
-        response.raise_for_status()
-        data = response.json()
-        return data.get("access_token", None)
+        response = requests.post(
+            f"{API_URL}/login", 
+            json={"username": username, "password": password},
+            timeout=10
+        )
+        
+        # Check status code before raising
+        if response.status_code == 200:
+            data = response.json()
+            return data.get("access_token", None)
+        elif response.status_code == 401:
+            print("Invalid credentials provided")
+            return None
+        else:
+            st.error(f"Login failed: {response.status_code} - {response.text}")
+            return None
+            
+    except requests.exceptions.RequestException as e:
+        st.error(f"Connection error: {e}")
+        return None
     except Exception as e:
-        st.error(f"Login failed: {e}")
+        st.error(f"Unexpected error: {e}")
         return None
