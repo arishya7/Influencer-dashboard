@@ -69,7 +69,7 @@ def get_influencers(
     num_children_min: Optional[int] = None,
     age_children_min:Optional[int] = None,
     
-    limit: int = 50,
+    limit: Optional[int] = None,
     skip: int = 0
 ):
 
@@ -117,7 +117,10 @@ def get_influencers(
 
     # limit of one page
     total = len(filtered_df)
-    result = filtered_df.iloc[skip: skip + limit]
+    if limit is None:
+        result = filtered_df.copy()
+    else:
+        result = filtered_df.iloc[skip: skip + limit]
     result = result.replace([np.nan,np.inf],None)
 
     wanted_col = [
