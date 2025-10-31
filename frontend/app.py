@@ -202,6 +202,8 @@ with st.sidebar:
         st.toast("✨ Filters cleared!")
         st.rerun()
 
+    show_all = st.sidebar.checkbox("Show All Profiles", value=False)
+
     platform = st.multiselect("Platform", ["Tiktok", "Rednote", "Instagram"],key="platform_filter")
     country = st.multiselect("Country", ["Singapore", "China", "Malaysia", "United States", "Others"],key="country_filter")
     primary_category = st.multiselect(
@@ -221,7 +223,6 @@ with st.sidebar:
         st.session_state.clear()
         st.toast("👋 Logged out successfully!")
         st.rerun()
-
 
 
     
@@ -301,10 +302,15 @@ if child_num > 0:
     params.append(("num_children_min", str(child_num)))
 
 # --- Pagination ---
-offset = (st.session_state.page - 1) * PAGE_SIZE
-params.append(("limit", str(PAGE_SIZE)))
-params.append(("skip", str(offset)))
 
+if show_all:
+    params = [p for p in params if p[0] not in ("limit", "skip")]
+    params.append(("limit", str(10000)))
+    params.append(("skip", "0"))
+else:
+    offset = (st.session_state.page - 1) * PAGE_SIZE
+    params.append(("limit", str(PAGE_SIZE)))
+    params.append(("skip", str(offset)))
 
 
 #TAB1 - INFLUENCER PROFILES
