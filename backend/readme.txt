@@ -45,7 +45,60 @@ secondary_category: {
     "Family Vlog / Activities": "Family%20Vlog%20%2F%20Activities"
 }
 
-=======Edit API=============
-http://127.0.0.1:8000/influencers/r964cdc93
+=======Edit and save change API of creators =============
+http://localhost:8000/influencers/update-creator/2736
+method: PATCH
+parameter:creator_id (2736)
 body, json
 {"num_children":2}
+
+====== Edit and save change of mentions =====
+http://localhost:8000/influencers/update-mentions/2736
+method: PATCH
+parameter:creator_id(2736)
+body, json
+{
+  "mentions": ["mummys market"]
+}
+
+===== login ===
+http://localhost:8000/login 
+method: POST
+
+==== export csv for main user ======
+http://localhost:8000/influencers/export
+method: GET 
+parameter: user1
+
+==== add new row ===
+http://localhost:8000/influencers/add-row
+method: POST 
+{
+  "name": "string",
+  "username": "string",
+  "source": "string",
+  "followers": 0,
+  "uniqueid": "string",
+  "heart": 0,
+  "verified": 0,
+  "country": "string",
+  "primary_category": "string",
+  "secondary_category": "string",
+  "email": "string",
+  "tier": "string",
+  "is_brand": 0,
+  "contact": "string",
+  "bio": "string",
+  "profile_url": "string",
+  "age_children": 0,
+  "num_children": 0
+}
+
+====== add new column ====
+http://localhost:8000/influencers/add-column
+method: POST 
+{
+  "column": "outbound_status"
+}
+
+==== save the change of new columns =====
