@@ -4,7 +4,7 @@ import pandas as pd
 import streamlit as st
 
 
-INFLUENCER = "http://api:8000/influencers"
+INFLUENCER = API_URL = "http://{API_URL}/influencers"
 API_URL = "http://api:8000"
 
 def fetch_influencers(params=None):
