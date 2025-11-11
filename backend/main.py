@@ -32,6 +32,7 @@ users_table = metadata.tables["users"]
 def load_data():
     query ="""
 SELECT 
+    c.creator_id,
     c.uniqueid,
     c.name,
     c.username,
@@ -74,7 +75,7 @@ LEFT JOIN posts p ON c.creator_id = p.creator_id;
 
 
     return df
-df = load_data()
+#df = load_data()
    
 
 @app.get("/influencers")
@@ -93,7 +94,7 @@ def get_influencers(
     limit: Optional[int] = None,
     skip: int = 0
 ):
-
+    df= load_data()
     filtered_df = df.copy()
     filtered_df["age_children"] = pd.to_numeric(filtered_df["age_children"],errors="coerce")
 
@@ -145,9 +146,9 @@ def get_influencers(
     result = result.replace([np.nan,np.inf],None)
 
     wanted_col = [
-        "name", "username", "source", "followers", "uniqueid","heart","verified",
-        "country", "primary_category", "secondary_category","email","tier","is_brand",
-        "contact", "bio", "profile_url","age_children","num_children","mentions"
+        "creator_id","name", "username", "source", "followers", "uniqueid","heart",
+        "verified", "country", "primary_category", "secondary_category","email","tier",
+        "is_brand", "contact", "bio", "profile_url","age_children","num_children","mentions"
     ]
     existing_col = [c for c in wanted_col if c in result.columns]
 
@@ -344,9 +345,28 @@ def add_influencer_row(data: InfluencerCreate):
             );
         """)
 
-        
-        db.execute(insert_query, data.dict())
+        #db.execute(insert_query, data.dict())
+        result = db.execute(insert_query,data.dict())
         db.commit()
+
+        # get creator id
+        creator_id = result.lastrowid
+        if not creator_id:
+            raise HTTPException(status_code=500, detail= "Failed to find creator_id")
+        
+        #create the post use this creator id
+        insert_post_sql = text("""
+            INSERT INTO posts (creator_id, mentions)
+            VALUES (:cid, :mentions);
+        """)
+
+
+        db.execute(insert_post_sql, {
+            "cid": creator_id,
+            "mentions": json.dumps([])   # empty list []
+        })
+        db.commit()
+
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -354,7 +374,8 @@ def add_influencer_row(data: InfluencerCreate):
     finally:
         db.close()
 
-    return {"status": "success", "message": "Influencer added successfully"}
+    return {"status": "success", "message": "Influencer added successfully",
+            "creator_id":creator_id}
 
 
 @app.post("/influencers/add-column")
