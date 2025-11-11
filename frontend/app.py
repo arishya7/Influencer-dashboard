@@ -312,6 +312,12 @@ else:
     params.append(("limit", str(PAGE_SIZE)))
     params.append(("skip", str(offset)))
 
+if "custom_columns" not in st.session_state:
+    st.session_state.custom_columns = []
+
+if "added_rows" not in st.session_state:
+    st.session_state.added_rows = {}   # keyed by page number
+
 
 #TAB1 - INFLUENCER PROFILES
 with tab1:
@@ -319,8 +325,6 @@ with tab1:
 
 
     data = fetch_influencers(params)
- 
-
     if not data.empty:
         # Add Save column (unchecked by default)
         data["Save"] = False
@@ -330,6 +334,15 @@ with tab1:
             current_start = (st.session_state.page - 1) * PAGE_SIZE + 1
             current_end = min(total, current_start + len(data) - 1)
             st.markdown(f"**Showing {current_start}-{current_end} of {total} results**")
+
+        # Append any added rows for the current page
+        for col in st.session_state.custom_columns:
+            if col not in data.columns:
+                data[col] = ""
+        page_rows = st.session_state.added_rows.get(st.session_state.page, [])
+        if page_rows:
+            extra_df = pd.DataFrame(page_rows)
+            data = pd.concat([data, extra_df], ignore_index=True)
 
         # Use editable data table
         edited_data = st.data_editor(
@@ -354,6 +367,34 @@ with tab1:
 
             combined = pd.concat([existing, saved_rows]).drop_duplicates(subset=["username"], keep="last")
             combined.to_csv(SAVE_FILE, index=False)
+        #add rows/columsb buttons
+        st.markdown("<br>", unsafe_allow_html=True)
+        col1, col2= st.columns([4,2])
+        with col1:
+            new_col_name = st.text_input("New Column", placeholder="Enter column name", key="new_col_input")
+        with col2:
+            st.write("")  # spacer
+            st.write("")  # spacer
+            co1, co2= st.columns([1,1])
+            with co1:
+                if st.button("Add Column"):
+                    if new_col_name.strip():
+                        if new_col_name not in st.session_state.custom_columns:
+                            st.session_state.custom_columns.append(new_col_name)
+                            st.success(f"Added column: {new_col_name}")
+                            st.rerun()
+                        else:
+                            st.warning("Column already exists.")
+            with co2:
+                if st.button("Add Row"):
+                    page = st.session_state.page
+                    if page not in st.session_state.added_rows:
+                        st.session_state.added_rows[page] = []
+                    empty = {col: "" for col in data.columns}
+                    st.session_state.added_rows[page].append(empty)
+                    empty = {col: "" for col in data.columns}
+                    st.success("Added empty row!")
+                    st.rerun()
 
         # Pagination buttons
         st.markdown("<br>", unsafe_allow_html=True)
@@ -386,47 +427,64 @@ with tab1:
     else:
         st.info("No influencers found with the selected filters.")
 
+        with tab1:
+    
+            # ---- ADDITION: UI for adding columns/rows ----
+            st.subheader("➕ Customization")
+
+            colA, colB = st.columns([2, 1])
+
+            with colA:
+                new_col_name = st.text_input("New Column", placeholder="Enter column name")
+            with colB:
+                if st.button("Add Column"):
+                    if new_col_name.strip():
+                        if new_col_name not in st.session_state.custom_columns:
+                            st.session_state.custom_columns.append(new_col_name)
+                            st.success(f"Added column: {new_col_name}")
+                            st.rerun()
+                        else:
+                            st.warning("Column already exists.")
+
+            if st.button("Add Empty Row to This Page"):
+                page = st.session_state.page
+
+                if page not in st.session_state.added_rows:
+                    st.session_state.added_rows[page] = []
+
+                empty = {col: "" for col in data.columns}
+                # Add custom columns empty fields too
+                for col in st.session_state.custom_columns:
+                    empty[col] = ""
+
+                st.session_state.added_rows[page].append(empty)
+                st.success("Added empty row!")
+                st.rerun()
+
+
 # TAB 2 - SAVED PROFILES
 with tab2:
     st.markdown("### Saved Profiles")
     try:
-        saved_df = pd.read_csv(SAVE_FILE)
+        # Load saved profiles into session state
+        if "saved_df" not in st.session_state:
+            st.session_state.saved_df = pd.read_csv(SAVE_FILE)
         
-        # Add Remove column (unchecked by default)
-        saved_df["Remove"] = False
-        
-        st.success(f"Total saved profiles: {len(saved_df)}")
-        
-        # Use editable data table
-        edited_saved = st.data_editor(
-            saved_df,
-            use_container_width=True,
-            hide_index=True,
-            column_config={
-                "Remove": st.column_config.CheckboxColumn("Remove", help="Tick to remove this profile")
-            },
-            key="saved_profiles_editor"
-        )
-        
-        # Get rows marked for removal
-        rows_to_remove = edited_saved[edited_saved["Remove"] == True]
-        
-        if not rows_to_remove.empty:
-            st.warning(f"{len(rows_to_remove)} profile(s) marked for removal.")
-            if st.button("Confirm Removal"):
-                # Keep only rows NOT marked for removal
-                remaining = edited_saved[edited_saved["Remove"] == False].drop(columns=["Remove"])
-                remaining.to_csv(SAVE_FILE, index=False)
-                st.success(f"Removed {len(rows_to_remove)} profile(s)!")
-                st.rerun()
-        
+        saved_df = st.session_state.saved_df.copy()
+
+        # ---------- SAVE TO CSV ----------
+        if st.button("💾 Save Changes"):
+            saved_df.to_csv(SAVE_FILE, index=False)
+            st.success("Saved changes to CSV!")
+
         # Download button
-        csv = saved_df.drop(columns=["Remove"]).to_csv(index=False).encode('utf-8')
+        csv = saved_df.to_csv(index=False).encode("utf-8")
         st.download_button(
-            label="Download CSV",
-            data=csv,
-            file_name='saved_profiles.csv',
-            mime='text/csv',
+            "Download CSV",
+            csv,
+            "saved_profiles.csv",
+            "text/csv"
         )
+
     except FileNotFoundError:
         st.info("No saved profiles yet.")
