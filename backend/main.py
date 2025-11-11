@@ -347,7 +347,7 @@ def add_influencer_row(data: InfluencerCreate):
 
         #db.execute(insert_query, data.dict())
         result = db.execute(insert_query,data.dict())
-        db.commit()
+        #db.commit()
 
         # get creator id
         creator_id = result.lastrowid

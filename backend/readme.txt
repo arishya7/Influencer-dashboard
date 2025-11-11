@@ -102,3 +102,13 @@ method: POST
 }
 
 ==== save the change of new columns =====
+http://localhost:8000/influencers/save-added
+method:POST 
+{
+  "row": [
+    {
+        "creator_id":2377,
+        "outbound_status":"sent"
+    }
+  ]
+}
