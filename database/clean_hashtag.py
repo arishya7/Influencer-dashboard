@@ -5,7 +5,7 @@ from sqlalchemy import create_engine
 
 
 # MySQL connection
-engine = create_engine("mysql+pymysql://root:1111@127.0.0.1:3306/socialhub")
+engine = create_engine()
 
 
 def clean_hashtag(tag: str) -> str:
